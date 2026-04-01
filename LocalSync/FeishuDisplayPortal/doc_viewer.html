@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞书同步文档 - 详情预览</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-light: #34d399;
+            --bg: #f8fafc;
+            --card: rgba(255, 255, 255, 0.85);
+            --text: #334155;
+            --text-dim: #64748b;
+            --text-muted: #94a3b8;
+            --border: rgba(16, 185, 129, 0.15);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0, transparent 60%);
+        }
+
+        /* === 落叶动画 === */
+        .leaf-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .leaf {
+            position: absolute;
+            top: -50px;
+            width: 28px;
+            height: 28px;
+            fill: rgba(16, 185, 129, 0.15);
+            filter: blur(0.5px);
+            animation: fall var(--duration) linear infinite, sway 5s ease-in-out infinite alternate;
+            animation-delay: var(--delay);
+            transform: rotate(var(--rotate-start));
+        }
+        @keyframes fall {
+            0% { top: -50px; opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 0.8; }
+            100% { top: 110vh; opacity: 0; }
+        }
+        @keyframes sway {
+            0% { transform: translateX(0px) rotate(0deg); }
+            100% { transform: translateX(60px) rotate(60deg); }
+        }
+
+        .header {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .title-group h1 { 
+            margin: 0; 
+            font-size: 1.3rem; 
+            background: linear-gradient(135deg, #065f46, #10b981);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .title-group p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-dim); }
+
+        .main-wrapper {
+            display: flex;
+            align-items: flex-start;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 2rem;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        /* === 侧边栏 === */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 100px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(8px);
+            padding: 1.25rem 1rem;
+            display: none;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-left: 0.5rem;
+        }
+
+        .toc-list { list-style: none; padding: 0; margin: 0; }
+        
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: block;
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            padding: 0.4rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-left: 2px solid transparent;
+        }
+
+        .toc-link:hover {
+            background: rgba(16, 185, 129, 0.05);
+            color: var(--primary);
+        }
+
+        .toc-link.active {
+            color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .toc-level-1 { padding-left: 0.5rem; font-weight: 500;}
+        .toc-level-2 { padding-left: 1.2rem; font-size: 0.8rem; }
+        .toc-level-3 { padding-left: 2rem; font-size: 0.8rem; }
+        .toc-level-4 { padding-left: 2.8rem; font-size: 0.75rem; }
+
+        /* === 正文区域 === */
+        .article-container {
+            flex: 1;
+            min-width: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(5, 150, 105, 0.04);
+            backdrop-filter: blur(12px);
+            padding: 3rem 4rem;
+            z-index: 1;
+        }
+
+        /* Block Render Styles */
+        .doc-content h1 { font-size: 2rem; margin: 2rem 0 1rem; color: #065f46; scroll-margin-top: 100px; }
+        .doc-content h2 { font-size: 1.5rem; margin: 1.8rem 0 0.8rem; border-bottom: 2px solid rgba(16, 185, 129, 0.1); padding-bottom: 0.4rem; color: #065f46; scroll-margin-top: 100px; }
+        .doc-content h3 { font-size: 1.25rem; margin: 1.4rem 0 0.6rem; color: #047857; scroll-margin-top: 100px; }
+        .doc-content h4 { font-size: 1.1rem; margin: 1.2rem 0 0.5rem; color: #065f46; scroll-margin-top: 100px; }
+        .doc-content p { line-height: 1.8; margin-bottom: 1.2rem; color: #334155; }
+        .doc-content ul, .doc-content ol { padding-left: 1.8rem; margin-bottom: 1.2rem; color: #334155; line-height: 1.7; }
+        .doc-content li { margin-bottom: 0.5rem; }
+        .doc-content blockquote { border-left: 4px solid var(--primary); margin: 1.5rem 0; padding: 0.8rem 1.2rem; background: rgba(16, 185, 129, 0.05); color: var(--text-dim); border-radius: 0 8px 8px 0; }
+        .doc-content pre { background: #f1f5f9; padding: 1.2rem; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); margin: 1.5rem 0; }
+        .doc-content code { font-family: monospace; color: #059669; }
+        
+        .loading { text-align: center; padding: 4rem; color: var(--text-dim); }
+        .error { color: #f87171; text-align: center; padding: 2rem; background: rgba(248, 113, 113, 0.1); border-radius: 8px; }
+        .raw-json { font-size: 0.8rem; color: var(--text-muted); padding: 1rem; line-height: 1.5; white-space: pre-wrap; word-break: break-all; }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--primary); }
+
+        @media (max-width: 900px) {
+            .main-wrapper { flex-direction: column; padding: 1rem; gap: 1rem; }
+            .sidebar { width: 100%; position: static; max-height: 250px; }
+            .article-container { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="leaf-container" id="leafContainer"></div>
+    <header class="header">
+        <div class="title-group">
+            <h1 id="docTitle">加载中...</h1>
+            <p id="docMeta">飞书云文档在线预览</p>
+        </div>
+        <a href="#" onclick="window.close()" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            关闭页面
+        </a>
+    </header>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏大纲 -->
+        <aside class="sidebar" id="tocSidebar">
+            <div class="sidebar-title">文档大纲</div>
+            <ul class="toc-list" id="tocList"></ul>
+        </aside>
+
+        <!-- 正文 -->
+        <main class="article-container" id="contentArea">
+            <div class="loading">正在拉取飞书文档数据，请稍候...</div>
+        </main>
+    </div>
+
+    <script>
+        const docId = window.location.pathname.split('/').pop();
+        let tocData = []; // 保存大纲数据
+
+        async function init() {
+            const area = document.getElementById('contentArea');
+            try {
+                const res = await fetch('/api/doc/' + docId);
+                if (!res.ok) throw new Error(await res.text());
+                
+                const data = await res.json();
+                document.getElementById('docTitle').textContent = data.title || '飞书文档';
+                document.getElementById('docMeta').textContent = '最后同步时间: ' + new Date(data.sync_time).toLocaleString('zh-CN');
+                
+                let parsedContent = null;
+                try {
+                    parsedContent = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
+                } catch(e) { /* ignore */ }
+
+                if (parsedContent && parsedContent.document && parsedContent.blocks) {
+                    area.innerHTML = '<div class="doc-content">' + renderFeishuBlocks(parsedContent) + '</div>';
+                    buildSidebar(); // 渲染完成后构建大纲
+                } else {
+                    let rawDisplay = typeof data.content === 'object' ? JSON.stringify(data.content, null, 2) : String(data.content);
+                    area.innerHTML = `
+                        <div class="error">由于原本的同步脚本只拉取了文档的基础信息，没有拉取 Blocks 正文，此处显示原始同步数据：</div>
+                        <div class="raw-json">${escapeHtml(rawDisplay)}</div>
+                    `;
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('docTitle').textContent = '加载失败';
+                area.innerHTML = '<div class="error">文档拉取失败: ' + escapeHtml(err.message) + '</div>';
+            }
+        }
+
+        // 轻量级飞书 Block 渲染引擎
+        function renderFeishuBlocks(feishuData) {
+            tocData = []; // 重置大纲
+            const blocks = feishuData.blocks || [];
+            if (blocks.length === 0) return '<p>空文档</p>';
+            
+            const blockMap = {};
+            blocks.forEach(b => blockMap[b.block_id] = b);
+            
+            const pageBlock = blocks.find(b => b.block_type === 1);
+            if (!pageBlock) return '<p class="error">未能找到根页面块</p>';
+
+            function renderBlock(blockId) {
+                const b = blockMap[blockId];
+                if (!b) return '';
+                
+                let text = '';
+                // 提取纯文本做 TOC 标题过滤，提取包含样式的做渲染
+                let plainText = ''; 
+                let elements = null;
+                for (let k in b) {
+                    if (b[k] && Array.isArray(b[k].elements)) {
+                        elements = b[k].elements;
+                        break;
+                    }
+                }
+                
+                if (elements) {
+                    text = elements.map(e => {
+                        let content = e.text_run ? e.text_run.content : '';
+                        plainText += content;
+                        if (e.text_run && e.text_run.text_element_style) {
+                            if (e.text_run.text_element_style.bold) return '<strong>' + escapeHtml(content) + '</strong>';
+                        }
+                        return escapeHtml(content);
+                    }).join('').replace(/\n/g, '<br>');
+                }
+
+                let html = '';
+                const anchorId = 'b_' + blockId;
+
+                switch (b.block_type) {
+                    case 2: html = '<p>' + text + '</p>'; break; // Text
+                    case 3: 
+                        html = '<h1 id="' + anchorId + '">' + text + '</h1>'; 
+                        if(plainText.trim()) tocData.push({ id: anchorId, text: plainText, level: 1 });
+                        break;
+                    case 4: 
+                        html = '<h2 id="' + anchorId + '">' + text + '</h2>'; 
+                        if(plainText.trim()) tocData.push({ id: anchorId, text: plainText, level: 2 });
+                        break;
+                    case 5: 
+                        html = '<h3 id="' + anchorId + '">' + text + '</h3>'; 
+                        if(plainText.trim()) tocData.push({ id: anchorId, text: plainText, level: 3 });
+                        break;
+                    case 6: 
+                        html = '<h4 id="' + anchorId + '">' + text + '</h4>'; 
+                        if(plainText.trim()) tocData.push({ id: anchorId, text: plainText, level: 4 });
+                        break;
+                    case 11: html = '<li>' + text + '</li>'; break;
+                    case 12: html = '<li>' + text + '</li>'; break;
+                    case 14: html = '<pre><code>' + text.replace(/<br>/g, '\\n') + '</code></pre>'; break;
+                    case 15: html = '<blockquote>' + text + '</blockquote>'; break;
+                    case 22: html = '<hr>'; break;
+                    default: 
+                        if (b.block_type !== 1 && text) html = '<p class="unknown">' + text + '</p>'; 
+                }
+
+                if (b.children && b.children.length > 0) {
+                    let childrenHtml = '';
+                    let currentListType = null;
+                    
+                    b.children.forEach(childId => {
+                        const cb = blockMap[childId];
+                        if (!cb) return;
+                        
+                        const isBullet = cb.block_type === 11;
+                        const isOrdered = cb.block_type === 12;
+                        
+                        if (isBullet) {
+                            if (currentListType !== 'ul') {
+                                if (currentListType) childrenHtml += '</' + currentListType + '>';
+                                currentListType = 'ul';
+                                childrenHtml += '<ul>';
+                            }
+                        } else if (isOrdered) {
+                            if (currentListType !== 'ol') {
+                                if (currentListType) childrenHtml += '</' + currentListType + '>';
+                                currentListType = 'ol';
+                                childrenHtml += '<ol>';
+                            }
+                        } else {
+                            if (currentListType) {
+                                childrenHtml += '</' + currentListType + '>';
+                                currentListType = null;
+                            }
+                        }
+                        childrenHtml += renderBlock(childId);
+                    });
+                    
+                    if (currentListType) childrenHtml += '</' + currentListType + '>';
+                    
+                    if (b.block_type === 1) html += childrenHtml;
+                    else if (b.block_type !== 11 && b.block_type !== 12) html += '<div class="nested" style="padding-left:1.5rem;">' + childrenHtml + '</div>';
+                    else html += childrenHtml.replace(/<ol>|<ul>/, match => match === '<ol>' ? '<ol style="margin-top:0.3rem">' : '<ul style="margin-top:0.3rem">');
+                }
+                
+                return html;
+            }
+
+            return renderBlock(pageBlock.block_id);
+        }
+
+        // 构建侧边栏大纲
+        function buildSidebar() {
+            const sidebar = document.getElementById('tocSidebar');
+            if (tocData.length === 0) return;
+            
+            sidebar.style.display = 'block';
+            const list = document.getElementById('tocList');
+            
+            list.innerHTML = tocData.map(item => 
+                `<li class="toc-item">
+                    <a href="#${item.id}" class="toc-link toc-level-${item.level}" title="${escapeHtml(item.text)}">
+                        ${escapeHtml(item.text)}
+                    </a>
+                </li>`
+            ).join('');
+
+            // 初始化滚动监听
+            setupScrollSpy();
+        }
+
+        // 滚动监听 (Scroll Spy)
+        function setupScrollSpy() {
+            const headings = Array.from(document.querySelectorAll('.doc-content h1, .doc-content h2, .doc-content h3, .doc-content h4'));
+            const tocLinks = document.querySelectorAll('.toc-link');
+            
+            if(headings.length === 0) return;
+
+            // 监听文档正文的标题进入视口的情况
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // 移除所有的 active 类
+                        tocLinks.forEach(link => link.classList.remove('active'));
+                        const targetLink = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+                        if (targetLink) {
+                            targetLink.classList.add('active');
+                            // 原生滚动跟随
+                            targetLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                });
+            }, { 
+                rootMargin: '-100px 0px -60% 0px' // 当标题滚动到距离顶部 100px 时触发
+            });
+            
+            headings.forEach(h => observer.observe(h));
+
+            // 平滑滚动点击
+            tocLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, // 减去 Header 高度
+                            behavior: 'smooth'
+                        });
+                        // 手动设置Active
+                        tocLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ==== 生成飘落的绿叶 ====
+        function initLeaves() {
+            const container = document.getElementById('leafContainer');
+            const leafCount = 8;
+            const leafPath = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 7,14 7,14C7,14 14,8 17,8Z" /></svg>';
+            
+            for (let i = 0; i < leafCount; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                leaf.innerHTML = leafPath;
+                
+                const leftPos = Math.random() * 100 + 'vw';
+                const delay = Math.random() * 15 + 's';
+                const duration = (Math.random() * 15 + 15) + 's';
+                const rotateStart = Math.random() * 360 + 'deg';
+                const scale = Math.random() * 0.5 + 0.6;
+
+                leaf.style.left = leftPos;
+                leaf.style.setProperty('--delay', delay);
+                leaf.style.setProperty('--duration', duration);
+                leaf.style.setProperty('--rotate-start', rotateStart);
+                leaf.style.transform = `scale(${scale})`;
+
+                container.appendChild(leaf);
+            }
+        }
+        
+        setTimeout(initLeaves, 100);
+
+        init();
+    </script>
+</body>
+</html>
