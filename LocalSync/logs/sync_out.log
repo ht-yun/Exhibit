@@ -1,0 +1,46 @@
+2026-04-06 15:00:11: [dotenv@17.3.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+2026-04-06 15:00:11: [error]: [ 'appId is needed' ]
+2026-04-06 15:00:11: [error]: [ 'appSecret is needed' ]
+2026-04-06 15:00:11: [info]: [ 'client ready' ]
+2026-04-06 15:00:11: [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2026-04-06 15:00:11: [info]: [ 'event-dispatch is ready' ]
+2026-04-06 15:00:11: 看板已启动: http://0.0.0.0:3000
+2026-04-06 15:00:11: 正在同步云文档状态至飞书多维表格...
+2026-04-06 15:05:42: [dotenv@17.3.1] injecting env (11) from FeishuSyncLocal\.env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-04-06 15:05:42: [info]: [ 'client ready' ]
+2026-04-06 15:05:42: [dotenv@17.3.1] injecting env (0) from FeishuSyncLocal\.env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2026-04-06 15:05:42: [info]: [ 'event-dispatch is ready' ]
+2026-04-06 15:05:42: 看板已启动: http://0.0.0.0:3000
+2026-04-06 15:05:42: 正在同步云文档状态至飞书多维表格...
+2026-04-06 15:39:31: [dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2026-04-06 15:39:31: [error]: [ 'appId is needed' ]
+2026-04-06 15:39:31: [error]: [ 'appSecret is needed' ]
+2026-04-06 15:39:31: [info]: [ 'client ready' ]
+2026-04-06 15:39:31: [dotenv@17.3.1] injecting env (0) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+2026-04-06 15:39:31: [info]: [ 'event-dispatch is ready' ]
+2026-04-06 15:39:31: 看板已启动: http://localhost:3000
+2026-04-06 15:39:31: 正在同步云文档状态至飞书多维表格...
+2026-04-06 17:47:28: [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2026-04-06 17:47:28: [error]: [ 'appId is needed' ]
+2026-04-06 17:47:28: [error]: [ 'appSecret is needed' ]
+2026-04-06 17:47:28: [info]: [ 'client ready' ]
+2026-04-06 17:47:28: [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2026-04-06 17:47:28: [info]: [ 'event-dispatch is ready' ]
+2026-04-06 17:47:28: 看板已启动: http://localhost:3000
+2026-04-06 17:47:28: 正在同步云文档状态至飞书多维表格...
+2026-04-06 19:57:37: [dotenv@17.3.1] injecting env (0) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+2026-04-06 19:57:37: [error]: [ 'appId is needed' ]
+2026-04-06 19:57:37: [error]: [ 'appSecret is needed' ]
+2026-04-06 19:57:37: [info]: [ 'client ready' ]
+2026-04-06 19:57:37: [dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-04-06 19:57:37: [info]: [ 'event-dispatch is ready' ]
+2026-04-06 19:57:37: 看板已启动: http://localhost:3000
+2026-04-06 19:57:37: 正在同步云文档状态至飞书多维表格...
+2026-04-06 21:18:15: [dotenv@17.3.1] injecting env (11) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2026-04-06 21:18:15: [info]: [ 'client ready' ]
+2026-04-06 21:18:15: [dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-04-06 21:18:15: [info]: [ 'event-dispatch is ready' ]
+2026-04-06 21:18:22: ✅ 数据库结构就绪
+2026-04-06 21:18:22: 看板已启动: http://localhost:3000
+2026-04-06 21:18:22: 正在同步云文档状态至飞书多维表格...
+2026-04-06 21:18:31: ✅ 状态反转同步完成: 创建了 0 条，更新了 3 条记录

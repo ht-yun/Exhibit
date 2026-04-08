@@ -1,0 +1,12 @@
+2026-04-06 15:00:10: ◇ injecting env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+2026-04-06 15:00:10: 外部展示端已启动: http://0.0.0.0:4000
+2026-04-06 15:05:42: ◇ injecting env (11) from FeishuDisplayPortal\.env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+2026-04-06 15:05:42: 外部展示端已启动: http://0.0.0.0:4000
+2026-04-06 15:39:31: ◇ injecting env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+2026-04-06 15:39:31: 外部展示端已启动: http://0.0.0.0:4000
+2026-04-06 17:47:28: ◇ injecting env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+2026-04-06 17:47:28: 外部展示端已启动: http://0.0.0.0:4000
+2026-04-06 19:57:37: ◇ injecting env (0) from .env // tip: ⌘ override existing { override: true }
+2026-04-06 19:57:37: 外部展示端已启动: http://0.0.0.0:4000
+2026-04-06 21:18:15: ◇ injecting env (11) from .env // tip: ⌘ suppress logs { quiet: true }
+2026-04-06 21:18:15: 外部展示端已启动: http://0.0.0.0:4000
