@@ -29,5 +29,7 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     tags JSONB DEFAULT '[]'::jsonb,
     description TEXT,
     download_count INTEGER DEFAULT 0,
-    upload_time TIMESTAMP DEFAULT NOW()
+    upload_time TIMESTAMP DEFAULT NOW(),
+    extracted_text TEXT,
+    kb_status TEXT DEFAULT 'none'
 );

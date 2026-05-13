@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. 数据库服务
+  db:
+    image: postgres:16
+    container_name: exhibit_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ht20070218
+      POSTGRES_DB: openclaw_data
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5432:5432"
+
+  # 2. 同步管理端
+  sync:
+    build: ./FeishuSyncLocal
+    container_name: exhibit_sync
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./FeishuSyncLocal/.env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=Ht20070218
+      - DB_NAME=openclaw_data
+    volumes:
+      - shared_uploads:/app/uploads
+    depends_on:
+      - db
+
+  # 3. 外部展示端
+  portal:
+    build: ./FeishuDisplayPortal
+    container_name: exhibit_portal
+    restart: always
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./FeishuDisplayPortal/.env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=Ht20070218
+      - DB_NAME=openclaw_data
+    volumes:
+      - shared_uploads:/app/uploads
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+  shared_uploads:

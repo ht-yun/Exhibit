@@ -1,0 +1,9 @@
+node_modules/
+LocalSync/logs/
+LocalSync/uploads/
+*.pptx
+*.mp4
+*.log
+.env
+.DS_Store
+Thumbs.db
